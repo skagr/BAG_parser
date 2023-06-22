@@ -6,7 +6,7 @@ version_date = '7 May 2023'
 locale.setlocale(locale.LC_ALL, 'nl_NL')
 
 # Location of BAG zip file downloaded from kadaster. See readme.MD
-file_bag = 'input/bag.zip'
+file_bag = 'input/lvbag-extract-nl.zip'
 
 # Location of gemeenten file downloaded from cbs.nl. See readme.MD
 file_gemeenten = 'input/gemeenten.csv'
