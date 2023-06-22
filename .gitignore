@@ -11,3 +11,4 @@ __pycache__/
 *.__pycache__
 *.code-workspace
 *.zip
+config_db.py
