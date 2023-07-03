@@ -1,4 +1,4 @@
-# Export sqlite BAG to csv or other format
+"""Export sqlite BAG to csv or other format"""
 
 import csv
 from statusbar import StatusUpdater
@@ -7,30 +7,29 @@ from database_sqlite import DatabaseSqlite
 
 
 class Exporter:
-
     def __init__(self):
-        self.database = DatabaseSqlite()
+        self.local_db = DatabaseSqlite()
         self.total_adressen = 0
 
     def __export_to_csv(self, output_filename, headers, sql, update_status=True):
         status = StatusUpdater()
 
         utils.print_log(f"start: export adressen naar csv file '{output_filename}'")
-        self.database.check_valid_database()
+        self.local_db.check_valid_database()
 
-        file = open(output_filename, 'w', newline='', encoding='utf-8')
+        file = open(output_filename, "w", newline="", encoding="utf-8")
         writer = csv.writer(file)
 
         if update_status:
-            total_adressen = self.database.fetchone("SELECT COUNT(*) FROM adressen;")
+            total_adressen = self.local_db.fetchone("SELECT COUNT(*) FROM adressen;")
             utils.print_log(f"Totaal aantal adressen: {total_adressen}")
             status.start(total_adressen)
 
         writer.writerow(headers)
 
         count = 0
-        self.database.cursor.execute(sql)
-        for row in self.database.cursor:
+        self.local_db.cursor.execute(sql)
+        for row in self.local_db.cursor:
             count += 1
             if update_status:
                 status.update(count)
@@ -39,11 +38,63 @@ class Exporter:
 
         if update_status:
             status.ready()
-        utils.print_log(f"ready: export naar csv")
+        utils.print_log("ready: export naar csv")
+
+    def __export_to_oracle(self, output_filename, headers, sql, update_status=True):
+        status = StatusUpdater()
+
+        utils.print_log(f"start: export adressen naar csv file '{output_filename}'")
+        self.local_db.check_valid_database()
+
+        file = open(output_filename, "w", newline="", encoding="utf-8")
+        writer = csv.writer(file)
+
+        if update_status:
+            total_adressen = self.local_db.fetchone("SELECT COUNT(*) FROM adressen;")
+            utils.print_log(f"Totaal aantal adressen: {total_adressen}")
+            status.start(total_adressen)
+
+        writer.writerow(headers)
+
+        count = 0
+        self.local_db.cursor.execute(sql)
+        for row in self.local_db.cursor:
+            count += 1
+            if update_status:
+                status.update(count)
+            writer.writerow(row)
+            # if count > 10000: break  # Debug speedup
+
+        if update_status:
+            status.ready()
+        utils.print_log("ready: export naar csv")
 
     def export_to_csv(self, output_filename):
-        headers = ['straat', 'huisnummer', 'toevoeging', 'postcode', 'gemeente', 'woonplaats', 'provincie',
-                   'bouwjaar', 'rd_x', 'rd_y', 'latitude', 'longitude', 'vloeroppervlakte', 'gebruiksdoel']
+        """
+        Export the data from the database to a CSV file.
+
+        Args:
+            output_filename (str): The name of the output CSV file.
+
+        Returns:
+            None
+        """
+        headers = [
+            "straat",
+            "huisnummer",
+            "toevoeging",
+            "postcode",
+            "gemeente",
+            "woonplaats",
+            "provincie",
+            "bouwjaar",
+            "rd_x",
+            "rd_y",
+            "latitude",
+            "longitude",
+            "vloeroppervlakte",
+            "gebruiksdoel",
+        ]
 
         sql = """
             SELECT
@@ -70,7 +121,16 @@ class Exporter:
         self.__export_to_csv(output_filename, headers, sql)
 
     def export_to_csv_postcode(self, output_filename):
-        headers = ['straat', 'huisnummer', 'toevoeging', 'postcode', 'woonplaats']
+        """
+        Export addresses from the database to a CSV file grouped by postcode4
+
+        Parameters:
+            output_filename (str): The name of the CSV file to be created.
+
+        Returns:
+            None
+        """
+        headers = ["straat", "huisnummer", "toevoeging", "postcode", "woonplaats"]
 
         sql = """
             SELECT
@@ -86,7 +146,22 @@ class Exporter:
         self.__export_to_csv(output_filename, headers, sql)
 
     def export_to_csv_postcode4_stats(self, output_filename):
-        headers = ['postcode4', 'center_lat', 'center_lon', 'aantal_adressen', 'woonplaats']
+        """
+        Export statistics (center lat/lon, count of addresses) from the database to a CSV file grouped by postcode4
+
+        Parameters:
+            output_filename (str): The name of the CSV file to be created.
+
+        Returns:
+            None
+        """
+        headers = [
+            "postcode4",
+            "center_lat",
+            "center_lon",
+            "aantal_adressen",
+            "woonplaats",
+        ]
 
         sql = """
           SELECT
@@ -103,7 +178,22 @@ class Exporter:
         self.__export_to_csv(output_filename, headers, sql, False)
 
     def export_to_csv_postcode5_stats(self, output_filename):
-        headers = ['postcode5', 'center_lat', 'center_lon', 'aantal_adressen', 'woonplaats']
+        """
+        Export statistics (center lat/lon, count of addresses) from the database to a CSV file grouped by postcode5
+
+        Parameters:
+            output_filename (str): The name of the CSV file to be created.
+
+        Returns:
+            None
+        """
+        headers = [
+            "postcode5",
+            "center_lat",
+            "center_lon",
+            "aantal_adressen",
+            "woonplaats",
+        ]
 
         sql = """
           SELECT
@@ -120,7 +210,22 @@ class Exporter:
         self.__export_to_csv(output_filename, headers, sql, False)
 
     def export_to_csv_postcode6_stats(self, output_filename):
-        headers = ['postcode6', 'center_lat', 'center_lon', 'aantal_adressen', 'woonplaats']
+        """
+        Export statistics (center lat/lon, count of addresses) from the database to a CSV file grouped by postcode
+
+        Parameters:
+            output_filename (str): The name of the CSV file to be created.
+
+        Returns:
+            None
+        """
+        headers = [
+            "postcode6",
+            "center_lat",
+            "center_lon",
+            "aantal_adressen",
+            "woonplaats",
+        ]
 
         sql = """
           SELECT
